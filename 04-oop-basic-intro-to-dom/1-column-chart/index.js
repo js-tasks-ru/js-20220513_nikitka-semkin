@@ -1,42 +1,36 @@
 export default class ColumnChart {
   element
-  chartHeight = 50
 
   constructor({ data = [], label = '', value = '', link = '' } = {}) {
     this.data = data
     this.label = label
     this.value = value
     this.link = link
+    this._chartHeight = 50
+    this.formatHeading(data)
     this.render()
     this.initEventListeners()
   }
 
+  formatHeading = data => {
+    return `USD ${data}`
+  }
+
+  get chartHeight() {
+    return this._chartHeight
+  }
+
   getTemplate() {
     return `
-    <div class="column-chart" style="height: ${this.chartHeight}px;">
+    <div class="${this.data.length ? 'column-chart' : 'column-chart_loading'}" style="height: ${this.chartHeight}px;">
     <div class="column-chart__title">
       ${this.label}
       <a href="/${this.link}" class="column-chart__link">View all</a>
     </div>
     <div class="column-chart__container">
-      <div data-element="header" class="column-chart__header">${this.value}</div>
+      <div data-element="header" class="column-chart__header">${this.formatHeading(this.value)}</div>
       <div data-element="body" class="column-chart__chart">
-        <div style="--value: 2" data-tooltip="6%"></div>
-        <div style="--value: 22" data-tooltip="44%"></div>
-        <div style="--value: 5" data-tooltip="11%"></div>
-        <div style="--value: 50" data-tooltip="100%"></div>
-        <div style="--value: 12" data-tooltip="25%"></div>
-        <div style="--value: 4" data-tooltip="8%"></div>
-        <div style="--value: 13" data-tooltip="28%"></div>
-        <div style="--value: 5" data-tooltip="11%"></div>
-        <div style="--value: 23" data-tooltip="47%"></div>
-        <div style="--value: 12" data-tooltip="25%"></div>
-        <div style="--value: 34" data-tooltip="69%"></div>
-        <div style="--value: 1" data-tooltip="3%"></div>
-        <div style="--value: 23" data-tooltip="47%"></div>
-        <div style="--value: 27" data-tooltip="56%"></div>
-        <div style="--value: 2" data-tooltip="6%"></div>
-        <div style="--value: 1" data-tooltip="3%"></div>
+        ${this.getColumnProps(this.data)}
       </div>
     </div>
   </div>
@@ -46,10 +40,12 @@ export default class ColumnChart {
   render() {
     const element = document.createElement('div') //(*)
 
+    // if (this.data.length === 0) {
+    //   element.classList.add('column-chart_loading')
+    // }
+
     element.innerHTML = this.getTemplate()
 
-    //NOTE: в этой строке мы избавимся от обертки-пустышки в виде div
-    // которой мы создали на строке (*)
     this.element = element.firstElementChild
   }
 
@@ -61,9 +57,30 @@ export default class ColumnChart {
     this.element.remove()
   }
 
+  update(data) {
+    this.data = data
+    this.render()
+  }
+
   destroy() {
     this.remove()
     this.element = null
-    //NOTE: удаляем обработчики событий, если они есть
+  }
+
+  getColumnProps(data) {
+    const maxValue = Math.max(...data)
+    const scale = 50 / maxValue
+
+    return data
+      .map(item => {
+        const percent = ((item / maxValue) * 100).toFixed(0) + '%'
+        const value = String(Math.floor(item * scale))
+        return this.getColumn(value, percent)
+      })
+      .join('')
+  }
+
+  getColumn(value, percent) {
+    return `<div style="--value: ${value}" data-tooltip="${percent}"></div>`
   }
 }

@@ -22,9 +22,11 @@ export default class ColumnChart {
 
   getTemplate() {
     return `
-    <div class="${this.data.length ? 'column-chart' : 'column-chart_loading'}" style="height: ${this.chartHeight}px;">
+    <div class="${this.data.length ? 'column-chart' : 'column-chart column-chart_loading'}" style="--chart-height: ${
+      this.chartHeight
+    }">
     <div class="column-chart__title">
-      ${this.label}
+      Total ${this.label}
       <a href="/${this.link}" class="column-chart__link">View all</a>
     </div>
     <div class="column-chart__container">
@@ -69,7 +71,7 @@ export default class ColumnChart {
 
   getColumnProps(data) {
     const maxValue = Math.max(...data)
-    const scale = 50 / maxValue
+    const scale = this.chartHeight / maxValue
 
     return data
       .map(item => {
@@ -83,5 +85,4 @@ export default class ColumnChart {
   getColumn(value, percent) {
     return `<div style="--value: ${value}" data-tooltip="${percent}"></div>`
   }
-
 }

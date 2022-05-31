@@ -83,4 +83,5 @@ export default class ColumnChart {
   getColumn(value, percent) {
     return `<div style="--value: ${value}" data-tooltip="${percent}"></div>`
   }
+
 }
